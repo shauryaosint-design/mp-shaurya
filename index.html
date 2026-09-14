@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FROM MPGI | Events Team</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            neon: { pink: '#ff2d95', cyan: '#00f5ff', purple: '#b026ff', yellow: '#ffe600' },
+            dark: { 900: '#050508', 800: '#0a0a12', 700: '#12121f', 600: '#1a1a2e' }
+          },
+          fontFamily: {
+            orbitron: ['Orbitron', 'sans-serif'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { scroll-behavior: smooth; }
+    body { background: #050508; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(18,18,31,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+    .neon-border {
+      border: 1px solid transparent;
+      background: linear-gradient(#0a0a12,#0a0a12) padding-box, linear-gradient(135deg,#00f5ff,#b026ff,#ff2d95) border-box;
+    }
+    .text-gradient {
+      background: linear-gradient(135deg,#00f5ff,#b026ff,#ff2d95);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-bg {
+      background: radial-gradient(ellipse at 20% 50%,rgba(0,245,255,0.15) 0%,transparent 50%),
+                  radial-gradient(ellipse at 80% 20%,rgba(176,38,255,0.12) 0%,transparent 50%),
+                  radial-gradient(ellipse at 50% 80%,rgba(255,45,149,0.1) 0%,transparent 50%);
+    }
+    .card-3d { transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s; transform-style: preserve-3d; }
+    .card-3d:hover { transform: translateY(-12px) rotateX(5deg) rotateY(-5deg); box-shadow: 0 25px 50px -12px rgba(0,245,255,0.25); }
+    .nav-link { position: relative; }
+    .nav-link::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:linear-gradient(90deg,#00f5ff,#b026ff); transition:width 0.3s; }
+    .nav-link:hover::after { width:100%; }
+    #particles-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+    .reveal { opacity:0; transform:translateY(40px); transition:all 0.8s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.active { opacity:1; transform:translateY(0); }
+    input, textarea, select { background:rgba(26,26,46,0.8); border:1px solid rgba(255,255,255,0.1); transition:all 0.3s; color:#fff; }
+    input:focus, textarea:focus, select:focus { outline:none; border-color:#00f5ff; box-shadow:0 0 0 3px rgba(0,245,255,0.15); }
+    .btn-neon { background:linear-gradient(135deg,#00f5ff,#b026ff); transition:all 0.3s; position:relative; overflow:hidden; }
+    .btn-neon::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent); transition:left 0.5s; }
+    .btn-neon:hover::before { left:100%; }
+    .btn-neon:hover { transform:scale(1.05); box-shadow:0 0 30px rgba(0,245,255,0.5); }
+    ::-webkit-scrollbar { width:8px; }
+    ::-webkit-scrollbar-track { background:#0a0a12; }
+    ::-webkit-scrollbar-thumb { background:linear-gradient(#00f5ff,#b026ff); border-radius:4px; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .event-card { cursor:pointer; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+  </style>
+</head>
+<body class="text-white">
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#/" class="flex items-center gap-2 group" onclick="goHome()">
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center font-orbitron font-bold text-sm group-hover:scale-110 transition-transform">FM</div>
+          <span class="font-orbitron font-bold text-lg tracking-wider">FROM MPGI</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#/" onclick="goHome()" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition">Home</a>
+          <a href="#/events" onclick="showSection('events')" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition">Events</a>
+          <a href="#/about" onclick="showSection('about')" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition">About</a>
+          <a href="#/team" onclick="showSection('team')" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition">Team</a>
+          <a href="#/contact" onclick="showSection('contact')" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition">Contact</a>
+        </div>
+        <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-300">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden glass border-t border-white/5">
+      <div class="px-4 py-4 space-y-3">
+        <a href="#/" onclick="goHome()" class="block text-gray-300 hover:text-white">Home</a>
+        <a href="#/events" onclick="showSection('events')" class="block text-gray-300 hover:text-white">Events</a>
+        <a href="#/about" onclick="showSection('about')" class="block text-gray-300 hover:text-white">About</a>
+        <a href="#/team" onclick="showSection('team')" class="block text-gray-300 hover:text-white">Team</a>
+        <a href="#/contact" onclick="showSection('contact')" class="block text-gray-300 hover:text-white">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HOME PAGE -->
+  <div id="page-home" class="page active">
+    <section class="relative min-h-screen flex items-center justify-center hero-bg pt-16">
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-neon-cyan/20 rounded-full blur-3xl" style="animation:float 6s ease-in-out infinite"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neon-purple/20 rounded-full blur-3xl" style="animation:float 6s ease-in-out infinite;animation-delay:-3s"></div>
+      </div>
+      <div class="relative z-10 max-w-5xl mx-auto px-4 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-neon-cyan/30 mb-8">
+          <span class="w-2 h-2 rounded-full bg-neon-cyan animate-pulse"></span>
+          <span class="text-sm text-neon-cyan font-medium tracking-wide">MPGI Events Collective</span>
+        </div>
+        <h1 class="font-orbitron font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl mb-6 leading-tight">
+          <span class="text-white">WE ARE</span><br>
+          <span class="text-gradient">FROM MPGI</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+          The heartbeat of events at MPGI. We organize competitions, fests, workshops & unforgettable experiences that make campus life electric.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="#/events" onclick="showSection('events')" class="btn-neon px-8 py-3.5 rounded-full font-semibold text-dark-900">View Running Events</a>
+          <a href="#/about" onclick="showSection('about')" class="px-8 py-3.5 rounded-full font-semibold border border-white/20 hover:bg-white/5 transition">Meet the Team</a>
+        </div>
+        <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+          <div class="glass rounded-2xl p-5 neon-border"><div class="font-orbitron text-3xl font-bold text-neon-cyan">10+</div><div class="text-sm text-gray-400 mt-1">Team Members</div></div>
+          <div class="glass rounded-2xl p-5 neon-border"><div class="font-orbitron text-3xl font-bold text-neon-purple">∞</div><div class="text-sm text-gray-400 mt-1">Events Energy</div></div>
+          <div class="glass rounded-2xl p-5 neon-border"><div class="font-orbitron text-3xl font-bold text-neon-pink">2029</div><div class="text-sm text-gray-400 mt-1">Batch Power</div></div>
+          <div class="glass rounded-2xl p-5 neon-border"><div class="font-orbitron text-3xl font-bold text-neon-yellow">MPGI</div><div class="text-sm text-gray-400 mt-1">Home Base</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="events" class="relative py-24 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 reveal">
+          <h2 class="font-orbitron font-bold text-4xl md:text-5xl mb-4"><span class="text-gradient">RUNNING</span> EVENTS</h2>
+          <p class="text-gray-400 max-w-xl mx-auto">Live competitions, workshops & campus experiences. Tap any event to open details.</p>
+        </div>
+        <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="col-span-full text-center text-gray-500 py-10">Loading events...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="relative py-24 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+          <div class="reveal">
+            <h2 class="font-orbitron font-bold text-4xl md:text-5xl mb-6">WHO <span class="text-gradient">WE ARE</span></h2>
+            <p class="text-gray-400 text-lg leading-relaxed mb-6">
+              We are a crew of passionate students from <span class="text-neon-cyan font-semibold">Maharana Pratap Group of Institutions (MPGI)</span>, united by one mission — to make campus life unforgettable through high-energy events, competitions, and creative experiences.
+            </p>
+            <p class="text-gray-400 leading-relaxed mb-8">
+              From coding battles to cultural nights, from finance management to social media campaigns — every role is filled by people who actually care.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <span class="px-4 py-2 rounded-full glass text-sm text-neon-cyan border border-neon-cyan/30">Competitions</span>
+              <span class="px-4 py-2 rounded-full glass text-sm text-neon-purple border border-neon-purple/30">Workshops</span>
+              <span class="px-4 py-2 rounded-full glass text-sm text-neon-pink border border-neon-pink/30">Cultural Fests</span>
+              <span class="px-4 py-2 rounded-full glass text-sm text-neon-yellow border border-neon-yellow/30">Campus Vibes</span>
+            </div>
+          </div>
+          <div class="reveal relative">
+            <div class="glass rounded-3xl p-8 neon-border relative overflow-hidden">
+              <h3 class="font-orbitron font-bold text-2xl mb-6 text-gradient">Our Vibe</h3>
+              <ul class="space-y-4">
+                <li class="flex items-start gap-3"><span class="text-neon-cyan text-xl">✦</span><span class="text-gray-300">Student-led, student-first energy</span></li>
+                <li class="flex items-start gap-3"><span class="text-neon-purple text-xl">✦</span><span class="text-gray-300">Full-stack team: tech, finance, PR, content, ops</span></li>
+                <li class="flex items-start gap-3"><span class="text-neon-pink text-xl">✦</span><span class="text-gray-300">Zero boring events — only high-impact ones</span></li>
+                <li class="flex items-start gap-3"><span class="text-neon-yellow text-xl">✦</span><span class="text-gray-300">Open for collaborations & sponsors</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" class="relative py-24 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 reveal">
+          <h2 class="font-orbitron font-bold text-4xl md:text-5xl mb-4">THE <span class="text-gradient">CREW</span></h2>
+          <p class="text-gray-400 max-w-xl mx-auto">The people who make the magic happen.</p>
+        </div>
+        <div id="team-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+      </div>
+    </section>
+
+    <section id="contact" class="relative py-24 z-10">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12 reveal">
+          <h2 class="font-orbitron font-bold text-4xl md:text-5xl mb-4">GET IN <span class="text-gradient">TOUCH</span></h2>
+          <p class="text-gray-400">Want to collaborate, sponsor, or just say hi?</p>
+        </div>
+        <div class="glass rounded-3xl p-8 md:p-10 neon-border reveal">
+          <form id="contact-form" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div><label class="block text-sm text-gray-400 mb-2">Name</label><input type="text" required placeholder="Your name" class="w-full px-4 py-3 rounded-xl"></div>
+              <div><label class="block text-sm text-gray-400 mb-2">Email</label><input type="email" required placeholder="you@example.com" class="w-full px-4 py-3 rounded-xl"></div>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">Subject</label>
+              <select class="w-full px-4 py-3 rounded-xl">
+                <option>Collaboration / Partnership</option>
+                <option>Sponsorship</option>
+                <option>Event Query</option>
+                <option>Join the Team</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div><label class="block text-sm text-gray-400 mb-2">Message</label><textarea rows="5" required placeholder="Tell us what's on your mind..." class="w-full px-4 py-3 rounded-xl resize-none"></textarea></div>
+            <button type="submit" class="btn-neon w-full py-4 rounded-xl font-semibold text-dark-900 text-lg">Send Message</button>
+          </form>
+          <div id="contact-success" class="hidden mt-6 text-center text-neon-cyan font-medium">Message received! We’ll get back to you soon 🚀</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="relative z-10 border-t border-white/5 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center font-orbitron font-bold text-sm">FM</div>
+            <div><div class="font-orbitron font-bold">FROM MPGI</div><div class="text-xs text-gray-500">Events Collective</div></div>
+          </div>
+          <p class="text-sm text-gray-500 text-center">Made with ⚡ by the FROM MPGI team · MPGI Kanpur</p>
+          <div class="text-sm text-gray-500">© 2026 FROM MPGI</div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- EVENT DETAIL PAGE -->
+  <div id="page-event" class="page relative z-10 min-h-screen pt-24 pb-16">
+    <div class="max-w-3xl mx-auto px-4">
+      <button onclick="goHome()" class="mb-8 flex items-center gap-2 text-neon-cyan hover:underline">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Events
+      </button>
+      <div id="event-detail" class="glass rounded-3xl p-8 md:p-10 neon-border"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE (#/321) -->
+  <div id="page-admin" class="page relative z-10 min-h-screen pt-24 pb-16">
+    <div class="max-w-2xl mx-auto px-4">
+      <div class="glass rounded-3xl p-8 neon-border">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-orbitron font-bold text-2xl text-gradient">Admin Panel</h2>
+          <button onclick="goHome()" class="text-gray-400 hover:text-white text-sm">← Exit</button>
+        </div>
+
+        <div id="admin-login-view">
+          <p class="text-gray-400 text-sm mb-4">Enter password to manage events</p>
+          <input type="password" id="admin-password" placeholder="Password" class="w-full px-4 py-3 rounded-xl mb-4">
+          <button onclick="loginAdmin()" class="btn-neon w-full py-3 rounded-xl font-semibold text-dark-900">Unlock</button>
+          <p class="text-xs text-gray-500 mt-3 text-center">Hint: frommpgi2026</p>
+        </div>
+
+        <div id="admin-dashboard-view" class="hidden">
+          <form id="event-form" class="space-y-4 mb-8">
+            <input type="hidden" id="edit-id">
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">Event Title</label>
+              <input type="text" id="event-title" required class="w-full px-4 py-2.5 rounded-xl" placeholder="e.g. CodeStorm Hackathon">
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">Category</label>
+              <select id="event-category" class="w-full px-4 py-2.5 rounded-xl">
+                <option>Competition</option><option>Workshop</option><option>Cultural</option><option>Sports</option><option>Tech Talk</option><option>Other</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">Date</label>
+                <input type="date" id="event-date" required class="w-full px-4 py-2.5 rounded-xl">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">Status</label>
+                <select id="event-status" class="w-full px-4 py-2.5 rounded-xl">
+                  <option value="live">🔴 Live Now</option>
+                  <option value="upcoming">🟡 Upcoming</option>
+                  <option value="ended">⚪ Ended</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">Description</label>
+              <textarea id="event-desc" rows="3" required class="w-full px-4 py-2.5 rounded-xl resize-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">Event Page Link (optional)</label>
+              <input type="url" id="event-link" class="w-full px-4 py-2.5 rounded-xl" placeholder="https://...">
+            </div>
+            <div class="flex gap-3">
+              <button type="submit" class="btn-neon flex-1 py-3 rounded-xl font-semibold text-dark-900">Save Event</button>
+              <button type="button" onclick="resetEventForm()" class="px-4 py-3 rounded-xl border border-white/20 text-gray-300 hover:bg-white/5">Clear</button>
+            </div>
+          </form>
+
+          <div class="border-t border-white/10 pt-6">
+            <h4 class="font-medium mb-4 text-gray-300">All Events (from MongoDB)</h4>
+            <div id="admin-events-list" class="space-y-3 max-h-72 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== TEAM (static) ==========
+    const TEAM = [
+      { name: "Shlok Dubey", course: "BCA 2029", role: "Event Head · Coordinator & Operations", color: "cyan" },
+      { name: "Shaurya Shukla", course: "BCA 2029", role: "Technical Head & Operations", color: "purple" },
+      { name: "Shivam Shukla", course: "BCA 2029", role: "Finance & Budget", color: "pink" },
+      { name: "Shiv Tiwari", course: "BCA 2029", role: "Finance & Budget", color: "pink" },
+      { name: "Vimal Katiyar", course: "BCA 2029", role: "Management & Operations", color: "yellow" },
+      { name: "Vivek Sharma", course: "BCA 2029", role: "Editing & Marketing Ops", color: "cyan" },
+      { name: "Sarthak Katiyar", course: "BCA 2029", role: "PR Team & SMM", color: "purple" },
+      { name: "Prince Singh", course: "BBA 2029", role: "Management", color: "yellow" },
+      { name: "Siddhant Pandey", course: "BCA", role: "Team Management", color: "cyan" },
+      { name: "Vridhhi", course: "BCA 2029", role: "Content Writing", color: "pink" }
+    ];
+
+    // ========== PARTICLES ==========
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+    window.addEventListener('resize',resizeCanvas); resizeCanvas();
+    class Particle {
+      constructor(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*2+0.5; this.speedX=(Math.random()-0.5)*0.4; this.speedY=(Math.random()-0.5)*0.4; this.color=['#00f5ff','#b026ff','#ff2d95'][Math.floor(Math.random()*3)]; }
+      update(){ this.x+=this.speedX; this.y+=this.speedY; if(this.x<0||this.x>canvas.width)this.speedX*=-1; if(this.y<0||this.y>canvas.height)this.speedY*=-1; }
+      draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle=this.color; ctx.globalAlpha=0.5; ctx.fill(); ctx.globalAlpha=1; }
+    }
+    function initParticles(){ particles=[]; const c=Math.min(70,Math.floor(window.innerWidth/15)); for(let i=0;i<c;i++) particles.push(new Particle()); }
+    initParticles();
+    (function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animate); })();
+
+    // ========== API ==========
+    async function fetchEvents() {
+      const res = await fetch('/api/events');
+      if (!res.ok) throw new Error('Failed to load events');
+      return res.json();
+    }
+
+    // ========== ROUTING ==========
+    function showPage(id){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const el = document.getElementById('page-'+id);
+      if(el) el.classList.add('active');
+      window.scrollTo(0,0);
+    }
+    function goHome(){ location.hash = '#/'; showPage('home'); }
+    function showSection(sec){
+      location.hash = '#/' + sec;
+      showPage('home');
+      setTimeout(()=>{ const el=document.getElementById(sec); if(el) el.scrollIntoView({behavior:'smooth'}); }, 50);
+    }
+    async function openEvent(id){
+      location.hash = '#/event/' + id;
+      showPage('event');
+      const box = document.getElementById('event-detail');
+      box.innerHTML = '<p class="text-gray-400">Loading...</p>';
+      try {
+        const res = await fetch('/api/events/' + id);
+        if (!res.ok) throw new Error('Not found');
+        const e = await res.json();
+        renderEventDetail(e);
+      } catch {
+        box.innerHTML = '<p class="text-gray-400">Event not found.</p>';
+      }
+    }
+    function openAdmin(){
+      location.hash = '#/321';
+      showPage('admin');
+      document.getElementById('admin-login-view').classList.remove('hidden');
+      document.getElementById('admin-dashboard-view').classList.add('hidden');
+      document.getElementById('admin-password').value = '';
+    }
+
+    function handleRoute(){
+      const hash = location.hash || '#/';
+      if(hash === '#/321' || hash === '#321'){ openAdmin(); return; }
+      const eventMatch = hash.match(/^#\/event\/(.+)$/);
+      if(eventMatch){ openEvent(eventMatch[1]); return; }
+      showPage('home');
+      if(hash === '#/events') showSection('events');
+      else if(hash === '#/about') showSection('about');
+      else if(hash === '#/team') showSection('team');
+      else if(hash === '#/contact') showSection('contact');
+    }
+    window.addEventListener('hashchange', handleRoute);
+
+    // ========== RENDER ==========
+    function statusBadge(status){
+      if(status==='live') return '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30">🔴 LIVE</span>';
+      if(status==='upcoming') return '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">🟡 UPCOMING</span>';
+      return '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/30">ENDED</span>';
+    }
+    function formatDate(d){ return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+
+    async function renderEvents(){
+      const grid = document.getElementById('events-grid');
+      try {
+        const events = await fetchEvents();
+        if (!events.length) {
+          grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">No events yet.</div>';
+          return;
+        }
+        grid.innerHTML = events.map((e,i)=>`
+          <div class="card-3d glass rounded-2xl p-6 neon-border event-card reveal" style="transition-delay:${i*0.08}s" onclick="openEvent('${e.id}')">
+            <div class="flex items-start justify-between mb-4">
+              <span class="text-xs font-medium px-3 py-1 rounded-full bg-white/5 text-gray-300">${e.category}</span>
+              ${statusBadge(e.status)}
+            </div>
+            <h3 class="font-orbitron font-bold text-xl mb-2">${e.title}</h3>
+            <p class="text-gray-400 text-sm mb-4 line-clamp-3">${e.desc}</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-sm text-neon-cyan">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                ${formatDate(e.date)}
+              </div>
+              <span class="text-xs text-gray-500">Tap to open →</span>
+            </div>
+          </div>
+        `).join('');
+        setTimeout(()=>document.querySelectorAll('#events-grid .reveal').forEach(el=>el.classList.add('active')),80);
+      } catch (err) {
+        grid.innerHTML = '<div class="col-span-full text-center text-red-400 py-10">Failed to load events. Is the server running?</div>';
+      }
+    }
+
+    function renderEventDetail(e){
+      const box = document.getElementById('event-detail');
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <span class="text-xs font-medium px-3 py-1 rounded-full bg-white/5 text-gray-300">${e.category}</span>
+          ${statusBadge(e.status)}
+        </div>
+        <h1 class="font-orbitron font-bold text-3xl md:text-4xl mb-4">${e.title}</h1>
+        <div class="flex items-center gap-2 text-neon-cyan mb-6">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          ${formatDate(e.date)}
+        </div>
+        <p class="text-gray-300 text-lg leading-relaxed mb-8">${e.desc}</p>
+        ${e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="btn-neon inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-dark-900">Open Event Page →</a>` : '<p class="text-gray-500 text-sm">No external link set for this event yet.</p>'}
+      `;
+    }
+
+    function renderTeam(){
+      const colors = { cyan:'from-neon-cyan to-blue-500', purple:'from-neon-purple to-pink-500', pink:'from-neon-pink to-rose-500', yellow:'from-neon-yellow to-orange-500' };
+      const grid = document.getElementById('team-grid');
+      grid.innerHTML = TEAM.map((m,i)=>`
+        <div class="card-3d glass rounded-2xl p-5 neon-border text-center reveal" style="transition-delay:${i*0.05}s">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${colors[m.color]||colors.cyan} flex items-center justify-center font-orbitron font-bold text-xl text-dark-900">
+            ${m.name.split(' ').map(n=>n[0]).join('').slice(0,2)}
+          </div>
+          <h3 class="font-semibold text-lg">${m.name}</h3>
+          <p class="text-xs text-gray-500 mb-2">${m.course}</p>
+          <p class="text-sm text-neon-cyan">${m.role}</p>
+        </div>
+      `).join('');
+    }
+
+    // ========== ADMIN ==========
+    const ADMIN_PASS = 'frommpgi2026';
+    function loginAdmin(){
+      if(document.getElementById('admin-password').value === ADMIN_PASS){
+        document.getElementById('admin-login-view').classList.add('hidden');
+        document.getElementById('admin-dashboard-view').classList.remove('hidden');
+        renderAdminList();
+      } else alert('Wrong password 🔒');
+    }
+
+    async function renderAdminList(){
+      const list = document.getElementById('admin-events-list');
+      try {
+        const events = await fetchEvents();
+        list.innerHTML = events.length ? events.map(e=>`
+          <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/5">
+            <div class="min-w-0">
+              <div class="font-medium truncate">${e.title}</div>
+              <div class="text-xs text-gray-500">${formatDate(e.date)} · ${e.status}${e.link?' · has link':''}</div>
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <button onclick="editEvent('${e.id}')" class="text-xs px-2 py-1 rounded bg-neon-cyan/20 text-neon-cyan">Edit</button>
+              <button onclick="deleteEvent('${e.id}')" class="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400">Remove</button>
+            </div>
+          </div>
+        `).join('') : '<p class="text-gray-500 text-sm">No events yet.</p>';
+      } catch {
+        list.innerHTML = '<p class="text-red-400 text-sm">Failed to load</p>';
+      }
+    }
+
+    function resetEventForm(){ document.getElementById('event-form').reset(); document.getElementById('edit-id').value=''; }
+
+    async function editEvent(id){
+      try {
+        const res = await fetch('/api/events/' + id);
+        const e = await res.json();
+        document.getElementById('edit-id').value = e.id;
+        document.getElementById('event-title').value = e.title;
+        document.getElementById('event-category').value = e.category;
+        document.getElementById('event-date').value = e.date;
+        document.getElementById('event-status').value = e.status;
+        document.getElementById('event-desc').value = e.desc;
+        document.getElementById('event-link').value = e.link || '';
+      } catch { alert('Failed to load event'); }
+    }
+
+    async function deleteEvent(id){
+      if(!confirm('Remove this event?')) return;
+      try {
+        await fetch('/api/events/' + id, { method: 'DELETE' });
+        renderAdminList();
+        renderEvents();
+      } catch { alert('Delete failed'); }
+    }
+
+    document.getElementById('event-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById('edit-id').value;
+      const body = {
+        title: document.getElementById('event-title').value,
+        category: document.getElementById('event-category').value,
+        date: document.getElementById('event-date').value,
+        status: document.getElementById('event-status').value,
+        desc: document.getElementById('event-desc').value,
+        link: document.getElementById('event-link').value.trim()
+      };
+      try {
+        if (editId) {
+          await fetch('/api/events/' + editId, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+        } else {
+          await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+        }
+        resetEventForm();
+        renderAdminList();
+        renderEvents();
+      } catch { alert('Save failed'); }
+    });
+
+    // ========== CONTACT ==========
+    document.getElementById('contact-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.getElementById('contact-success').classList.remove('hidden');
+      e.target.reset();
+      setTimeout(() => document.getElementById('contact-success').classList.add('hidden'), 4000);
+    });
+
+    // ========== INIT ==========
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderEvents();
+      renderTeam();
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+      handleRoute();
+    });
+  </script>
+</body>
+</html>
